@@ -48,7 +48,7 @@
                 <th scope="col">Срочность</th>
                 <th scope="col">Статус</th>
                 <th scope="col">Автор</th>
-                <th scope="col">Хронология</th>
+               <!--  <th scope="col">Хронология</th> -->
             </tr>
             </thead>
             <tbody>
@@ -65,7 +65,7 @@
                     <td>${task.urgency.name}</td>
                     <td>${task.status.name}</td>
                     <td>${task.autor.username}</td>
-                    <td>${task.chronos}</td>
+                    <!--<td>${task.chronos}</td> -->
                 </tr>
       <#else>
                 Пусто

@@ -11,7 +11,7 @@
         <ul class="navbar-nav mr-auto">
 
 
-            <#if isOperator || isManager>
+    <#if isOperator || isManager>
             <li class="nav-item">
                 <a class="nav-link" href="/addtoarchive">Добавление в Архив</a>
             </li>
@@ -31,10 +31,21 @@
                 <li class="nav-item">
                     <a class="nav-link" href="/showtask">Задачи</a>
                 </li>
-</#if>
+
+        <#if isGroupBoss>
+
+
                 <li class="nav-item">
-                    <a class="nav-link" href="/waitzlmy">Ждёт ЗЛ мои</a>
+                    <a class="nav-link" href="/myrgtasks">Задачи на мою РГ</a>
                 </li>
+        </#if>
+</#if>
+
+ <#if isAdmin>
+    <li class="nav-item">
+        <a class="nav-link" href="/usersettings">Настройки пользователей</a>
+    </li>
+ </#if>
 
 
         </ul>

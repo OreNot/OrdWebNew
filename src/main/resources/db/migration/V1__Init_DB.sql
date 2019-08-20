@@ -4,6 +4,7 @@ create sequence task_sequence start 1 increment 1;
 create sequence urgency_sequence start 1 increment 1;
 create sequence user_sequence start 2 increment 1;
 create sequence workgroup_sequence start 1 increment 1;
+create sequence groupmanager_sequence start 1 increment 1;
 
 create table fio (
   id int4 not null,
@@ -19,10 +20,11 @@ create table status (
 
 create table task (
   id int4 not null,
-  chronos varchar(1000),
+  chronos text,
   description varchar(1000) not null,
   exec_date varchar(255),
   reg_date varchar(255),
+  task_file_name varchar(255),
   report varchar(255),
   user_id int4,
   exec_id int4,
@@ -42,6 +44,15 @@ create table user_role (
   user_id int4 not null,
   roles varchar(255)
   );
+
+create table group_manager (
+  id int4 not null,
+  fio_id int4,
+  workgroup_id int4,
+  primary key (id)
+
+
+);
 
 create table usr (
   id int4 not null,
@@ -65,6 +76,8 @@ alter table if exists task add constraint task_urgency_fk foreign key (urgency_i
 alter table if exists task add constraint task_wgroup_fk foreign key (workgroup_id) references work_group;
 alter table if exists user_role add constraint role_usr_fk foreign key (user_id) references usr;
 alter table if exists usr add constraint usr_fio_fk foreign key (fio_id) references fio;
+alter table if exists group_manager add constraint group_manager_fio_fk foreign key (fio_id) references fio;
+alter table if exists group_manager add constraint group_manager_wgroup_fk foreign key (workgroup_id) references work_group;
 
 insert into urgency (name, id) values ('Очень важно', 1);
 insert into urgency (name, id) values ('Важно', 2);

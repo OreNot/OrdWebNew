@@ -10,6 +10,7 @@ public enum Role implements GrantedAuthority{
     SUPERBOSS,
     ADMIN;
 
+
     @Override
     public String getAuthority() {
         return name();

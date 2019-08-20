@@ -1,5 +1,6 @@
 <#import "parts/common.ftl" as c>
 
+
 <@c.page>
 <img src="${urlprefixPath}/img/greenatom.png" class="rounded float-left" width="145" height="159">
 <br>
@@ -63,6 +64,21 @@
                 </select>
             </div>
         </div>
+
+
+        <#if taskfilepath??>
+        Вложение : ${taskFileName}
+            <a class="btn btn-success mb-2" role="button" href="window['Ionic']['WebView'].convertFileSrc(${taskfilepath})"
+               download="${taskFileName}">
+                Посмотреть вложение
+            </a>
+
+            <div class="file-upload-wrapper mb-2">
+                <input type="file"  name="file" id="input-file-now" class="file-upload"/>
+                <label class="input-file-label" for="input-file-now">Изменить вложение</label>
+            </div>
+
+        </#if>
         <input type="hidden" name="editabletid" value="${tid}">
 
         <div class="form-group row mt-3">
@@ -80,6 +96,13 @@
         </div>
 
         <input type="hidden" name="_csrf" value="${_csrf.token}">
+
+        <div class="form-group row mt-3">
+            <div class="col-md-10">
+                <label for="exampleFormControlTextarea1">Хронология</label>
+                <textarea readonly class="form-control" name="сchronos" rows="5" style="min-width: 100%">${chronos}</textarea>
+            </div>
+        </div>
 
     </form>
     </div>

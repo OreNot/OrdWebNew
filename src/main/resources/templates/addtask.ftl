@@ -64,6 +64,11 @@
             </div>
         </div>
 
+        <div class="file-upload-wrapper mb-2">
+            <input type="file"  name="file" id="input-file-now" class="file-upload"/>
+            <label class="input-file-label" for="input-file-now">Вложение</label>
+        </div>
+
     <!--
         <div class="form-group row mt-3">
             <div class="col-sm-9">

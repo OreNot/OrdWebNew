@@ -61,7 +61,6 @@
             <artifactId>flyway-core</artifactId>
         </dependency>
 
-
     </dependencies>
 
     <properties>

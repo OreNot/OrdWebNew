@@ -30,6 +30,8 @@ public class Task {
     private String execDate;
     private String regDate;
 
+    private String taskFileName;
+
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     @JoinColumn(name = "workgroup_id")
     private WorkGroup workGroup;
@@ -147,5 +149,13 @@ public class Task {
 
     public void setRegDate(String regDate) {
         this.regDate = regDate;
+    }
+
+    public String getTaskFileName() {
+        return taskFileName;
+    }
+
+    public void setTaskFileName(String taskFileName) {
+        this.taskFileName = taskFileName;
     }
 }
