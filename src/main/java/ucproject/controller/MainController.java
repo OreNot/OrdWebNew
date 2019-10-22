@@ -28,7 +28,6 @@ import java.util.Map;
 
 
 @Controller
-
 public class MainController {
 
     @Value("${upload.path}")
@@ -49,7 +48,10 @@ public class MainController {
     public String main(Map<String, Object> model) {
 
          model.put("urlprefixPath", urlprefixPath);
-        return "main";
+
+
+
+        return "/main";
     }
 
 

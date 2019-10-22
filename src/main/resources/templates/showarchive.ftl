@@ -29,8 +29,8 @@
 </script>
 <img src="${urlprefixPath}/img/greenatom.png" class="rounded float-left" width="145" height="159">
 <br>
-<a href="${urlprefixPath}/addtoarchive.ftl">К добавлению</a>
-<br>
+
+
 <div>
     <#if count?has_content>
         Всего документов в архиве: ${count}

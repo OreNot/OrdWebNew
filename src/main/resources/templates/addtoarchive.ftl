@@ -2,8 +2,8 @@
 
 <@c.page>
 <img src="${urlprefixPath}/img/greenatom.png" class="rounded float-left" width="145" height="159">
-<br>
-<a href="${urlprefixPath}/showarchive.ftl">К просмотру</a>
+
+
 
 <script language="JavaScript">
     <!-- hide
@@ -13,13 +13,13 @@
 
 </script>
 
-<br>
+
 <div>
     <#if error?has_content>
         ${error}
     </#if>
 </div>
-<br>
+
 <div class="form-row">
     <div class="form-group col-md-6">
     <form method="post" enctype="multipart/form-data" id="js-upload-form">

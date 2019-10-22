@@ -21,11 +21,12 @@ create table status (
 create table task (
   id int4 not null,
   chronos text,
+  comment text,
   description varchar(1000) not null,
   exec_date varchar(255),
   reg_date varchar(255),
   task_file_name varchar(255),
-  report varchar(255),
+  report text,
   user_id int4,
   exec_id int4,
   status_id int4 not null,
@@ -47,7 +48,7 @@ create table user_role (
 
 create table group_manager (
   id int4 not null,
-  fio_id int4,
+  user_id int4,
   workgroup_id int4,
   primary key (id)
 
@@ -76,7 +77,7 @@ alter table if exists task add constraint task_urgency_fk foreign key (urgency_i
 alter table if exists task add constraint task_wgroup_fk foreign key (workgroup_id) references work_group;
 alter table if exists user_role add constraint role_usr_fk foreign key (user_id) references usr;
 alter table if exists usr add constraint usr_fio_fk foreign key (fio_id) references fio;
-alter table if exists group_manager add constraint group_manager_fio_fk foreign key (fio_id) references fio;
+alter table if exists group_manager add constraint group_manager_usr_fk foreign key (user_id) references usr;
 alter table if exists group_manager add constraint group_manager_wgroup_fk foreign key (workgroup_id) references work_group;
 
 insert into urgency (name, id) values ('Очень важно', 1);
@@ -92,10 +93,11 @@ insert into status (name, id) values ('В работе РГ', 5);
 insert into status (name, id) values ('В работе у исполнителя', 6);
 insert into status (name, id) values ('Выполнено', 7);
 
-insert into work_group (name, id) values ('УЦ', 1);
-insert into work_group (name, id) values ('Группа контроля доверия', 2);
-insert into work_group (name, id) values ('СКЗИ', 3);
+insert into work_group (name, id) values ('Группа доверенных сервисов', 1);
+insert into work_group (name, id) values ('Группа аудита', 2);
+insert into work_group (name, id) values ('Группа эксплуатации СКЗИ', 3);
+insert into work_group (name, id) values ('Не назначена', 4);
 
 insert into fio (fio, id) values ('Мартынюк Александр Александрович', 1);
-insert into fio (fio, id) values ('Реутова Анна Сергеевна', 2);
+
 

@@ -56,7 +56,7 @@ public class OperatorController {
             }
         }
         model.put("error", "");
-        model.put("urlprefixPath", urlprefixPath);
+       // model.put("urlprefixPath", urlprefixPath);
         return "addtoarchive";
     }
 
@@ -119,7 +119,7 @@ public class OperatorController {
             model.put("error", "*Необходимо заполнить все поля");
         }
 
-        model.put("urlprefixPath", urlprefixPath);
+        //model.put("urlprefixPath", urlprefixPath);
         return "addtoarchive";
     }
 

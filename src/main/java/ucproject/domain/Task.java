@@ -46,8 +46,11 @@ public class Task {
 
     String report;
 
-    @Size(min = 0, max = 1000)
+
     String chronos;
+
+
+    String comment;
 
     public Task() {
     }
@@ -158,4 +161,14 @@ public class Task {
     public void setTaskFileName(String taskFileName) {
         this.taskFileName = taskFileName;
     }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
+
+
 }

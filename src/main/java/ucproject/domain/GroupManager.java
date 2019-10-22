@@ -12,14 +12,19 @@ public class GroupManager {
     private Integer id;
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
-    @JoinColumn(name = "fio_id")
-    private Fio fio;
+    @JoinColumn(name = "user_id")
+    private User user;
 
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     @JoinColumn(name = "workgroup_id")
     private WorkGroup workGroup;
 
     public GroupManager() {
+    }
+
+    public GroupManager(User user, WorkGroup workGroup) {
+        this.user = user;
+        this.workGroup = workGroup;
     }
 
     public Integer getId() {
@@ -30,12 +35,12 @@ public class GroupManager {
         this.id = id;
     }
 
-    public Fio getFio() {
-        return fio;
+    public User getUser() {
+        return user;
     }
 
-    public void setFio(Fio fio) {
-        this.fio = fio;
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public WorkGroup getWorkGroup() {

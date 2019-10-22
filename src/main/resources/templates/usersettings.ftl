@@ -61,7 +61,7 @@
         <div class="form-group row mt-3">
             <div class="col-auto">
                 <select class="form-control" name="workgroup"  placeholder="РГ">
-
+                    <option value="NONE">NONE</option>
                     <#list workgroupslist as workgroup>
                         <option value="${workgroup.name}">${workgroup.name}</option>
                     </#list>

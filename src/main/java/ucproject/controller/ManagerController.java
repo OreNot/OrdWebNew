@@ -13,19 +13,23 @@ import org.springframework.web.multipart.MultipartFile;
 import ucproject.domain.*;
 import ucproject.repos.*;
 
+import javax.mail.*;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
+import javax.swing.*;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Controller
-@PreAuthorize("hasAuthority('MANAGER')")
+@PreAuthorize("hasAuthority('MANAGER') or hasAuthority('GROUPBOSS')")
 public class ManagerController {
 
     @Autowired
@@ -56,6 +60,15 @@ public class ManagerController {
     SimpleDateFormat dateFormatForDateField = new SimpleDateFormat("yyyy-MM-dd");
     SimpleDateFormat addDateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
     SimpleDateFormat fileNameDateFormat = new SimpleDateFormat("ddMMyyyyHHmmssSSS");
+
+    static String username = "";
+    static String password = "";
+
+    static String[] creds;
+
+    private static String CREDS_FILE_NAME = "C:\\Creds\\creds.txt";
+
+    private static final String SMTP_HOST_NAME = "core-s-exh01.gk.rosatom.local";
 
     @GetMapping("/addtask")
     public String addtask(Map<String, Object> model) {
@@ -173,25 +186,109 @@ public class ManagerController {
     @GetMapping("/showtask")
     public String showtask(
         Map<String, Object> model,
-        @RequestParam(required = false, defaultValue = "0") String workgroup,
         @AuthenticationPrincipal User user
         )
     {
         Iterable<Task> tasks = taskRepo.findAll();
+        //Iterable<Task> tasks = taskRepo.findByStatus(statusRepo.findByName(status));
+        /*
+        StringBuilder sb = new StringBuilder();
+        for (Task task : tasks)
+        {
+            try {
+                Date execDate = dateFormat.parse(task.getExecDate());
+                if (execDate.after(new Date()))
+                {
+                    sb.append("Исполнитель: " + task.getExecutor().getUsername() + "\n РГ: " + task.getWorkGroup().getName() + "\n Описание: \n" + task.getDescription() + "\n"  );
+                }
 
-        model.put("urlprefixPath", urlprefixPath);
-        model.put("tasks", tasks);
-
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
+        if (!sb.toString().equals(""))
+        {
+            //mailSending(sb.toString());
+        }
+*/
         Iterable<Urgency> urgencys;
+        Iterable<Status> statuses;
         Iterable<WorkGroup> workgroups;
+        Iterable<User> executors;
 
+        statuses = statusRepo.findAll();
         urgencys = urgencyRepo.findAll();
         workgroups = workGroupRepo.findAll();
+        executors = userRepo.findAll();
 
+        model.put("statuses", statuses);
         model.put("urgencys", urgencys);
         model.put("workgroups", workgroups);
+        model.put("executors", executors);
+        model.put("urlprefixPath", urlprefixPath);
+        model.put("tasks", tasks);
         return "showtask";
     }
+
+    @PostMapping("/showtask")
+    public String showfiltertask(
+            Map<String, Object> model,
+            @RequestParam(required = false, defaultValue = "0") String radiofilter,
+            @RequestParam(required = false, defaultValue = "0") String status,
+            @RequestParam(required = false, defaultValue = "0") String urgency,
+            @RequestParam(required = false, defaultValue = "0") String workgroup,
+            @RequestParam(required = false, defaultValue = "0") String executor,
+            @AuthenticationPrincipal User user
+    )
+    {
+
+        Iterable<Task> tasks = null;
+        switch (radiofilter)
+        {
+            case "statusfilter":
+
+                    tasks = !status.equals("Статус") && !status.equals("Все") ? taskRepo.findByStatusName(status) : taskRepo.findAll();
+
+            break;
+
+            case "urgencyfilter":
+                tasks = !urgency.equals("Важность") && !urgency.equals("Все") ? taskRepo.findByUrgencyName(urgency) : taskRepo.findAll();
+
+                break;
+
+            case "workgroupfilter":
+                tasks = !workgroup.equals("РГ") && !workgroup.equals("Все") ? taskRepo.findByworkGroupName(workgroup) : taskRepo.findAll();
+
+                break;
+
+            case "executorfilter":
+                tasks = !executor.equals("Исполнитель") && !executor.equals("Все") ? taskRepo.findByExecutor(userRepo.findByUsername(executor)) : taskRepo.findAll();
+
+                break;
+        }
+        //Iterable<Task> tasks = taskRepo.findByStatus(statusRepo.findByName(status));
+
+
+
+        Iterable<Urgency> urgencys;
+        Iterable<Status> statuses;
+        Iterable<WorkGroup> workgroups;
+        Iterable<User> executors;
+
+        statuses = statusRepo.findAll();
+        urgencys = urgencyRepo.findAll();
+        workgroups = workGroupRepo.findAll();
+        executors = userRepo.findAll();
+
+        model.put("statuses", statuses);
+        model.put("urgencys", urgencys);
+        model.put("workgroups", workgroups);
+        model.put("executors", executors);
+        model.put("urlprefixPath", urlprefixPath);
+        model.put("tasks", tasks);
+        return "showtask";
+    }
+
 
     @GetMapping("/showonetaskformanager")
     public String showonetaskformanager(
@@ -210,8 +307,20 @@ public class ManagerController {
 
         Optional<Task> taskOp = taskRepo.findById(Integer.parseInt(tid));
         Task task = taskOp.get();
-        String taskFilePath = task.getTaskFileName();
-        String taskFileName = task.getTaskFileName().substring(task.getTaskFileName().lastIndexOf("\\") + 1, task.getTaskFileName().length());
+
+
+        String taskFilePath;
+        String taskFileName;
+
+        try {
+            taskFilePath = task.getTaskFileName();
+            taskFileName = task.getTaskFileName().substring(task.getTaskFileName().lastIndexOf("\\") + 1, task.getTaskFileName().length());
+        }
+        catch (NullPointerException e)
+        {
+            taskFilePath = null;
+            taskFileName = null;
+        }
 
 
         model.put("chronos", task.getChronos());
@@ -257,8 +366,22 @@ public class ManagerController {
         WorkGroup editworkGroup = workGroupRepo.findByName(editableworkgroup);
         Urgency editurgency = urgencyRepo.findByName(editableurgency);
 
-        String taskFilePath = editableTask.getTaskFileName();
-        String taskFileName = editableTask.getTaskFileName().substring(editableTask.getTaskFileName().lastIndexOf("\\") + 1, editableTask.getTaskFileName().length());
+        String taskFilePath;
+        String taskFileName;
+        String oldFileName;
+        try
+        {
+            taskFilePath = editableTask.getTaskFileName();
+            taskFileName = editableTask.getTaskFileName().substring(editableTask.getTaskFileName().lastIndexOf("\\") + 1, editableTask.getTaskFileName().length());
+            oldFileName = editableTask.getTaskFileName().substring(editableTask.getTaskFileName().lastIndexOf("\\") + 1, editableTask.getTaskFileName().length());
+
+        }
+        catch (NullPointerException e)
+        {
+            taskFilePath = null;
+            taskFileName = null;
+            oldFileName = null;
+        }
 
         String selectedurgency = editableurgency;
         String selectedworkgroup = editableworkgroup;
@@ -266,7 +389,6 @@ public class ManagerController {
         String selectedexecdate = editableexecdate;
 
 
-        String oldFileName = editableTask.getTaskFileName().substring(editableTask.getTaskFileName().lastIndexOf("\\") + 1, editableTask.getTaskFileName().length());
 
         StringBuilder editList = new StringBuilder(addDateFormat.format(new Date()) + " Задача изменена пользователем " + user.getUsername() + ". \nСписок изменений: \n");
 
@@ -300,15 +422,29 @@ public class ManagerController {
         }
         if (file != null && !file.getOriginalFilename().equals("") && !file.getOriginalFilename().equals(oldFileName))
         {
-            File dir = new File(taskFilePath.substring(0, taskFilePath.lastIndexOf("\\")));
-
-            for (File f : dir.listFiles())
-            {
+            File dir;
+            if (taskFileName == null) {
+                dir = new File(manUpPath + "\\" + fileNameDateFormat.format(new Date()));
+            }
+            else {
+                dir = new File(taskFilePath.substring(0, taskFilePath.lastIndexOf("\\")));
                 try {
-                    Files.deleteIfExists(f.toPath());
-                } catch (IOException e) {
+                    for (File f : dir.listFiles()) {
+                        try {
+                            Files.deleteIfExists(f.toPath());
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+                catch (NullPointerException e)
+                {
                     e.printStackTrace();
                 }
+            }
+
+            if (!dir.exists()) {
+                dir.mkdir();
             }
 
             File destFile = new File(dir.getPath() + "\\" + file.getOriginalFilename());
@@ -360,6 +496,117 @@ public class ManagerController {
 
         model.put("workgroups", workgroups);
         return "showonetaskformanager";
+    }
+
+    private static class SMTPAuthenticator extends javax.mail.Authenticator {
+        public PasswordAuthentication getPasswordAuthentication() {
+            return new PasswordAuthentication(username, password);
+        }
+    }
+
+    static void mailSending(String sb) {
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DATE, -1);
+
+        SimpleDateFormat dateFormatBody = new SimpleDateFormat("dd.MM.yyyy");
+        SimpleDateFormat subFormatBody = new SimpleDateFormat("ddMMyyyy");
+
+        //String dateBody = dateFormatBody.format(new Date());
+        String dateBody = dateFormatBody.format(calendar.getTime());
+        //String dateSub = subFormatBody.format(new Date());
+        String dateSub = subFormatBody.format(calendar.getTime());
+
+
+        creds = credRead();
+        username = creds[0].replaceAll("\n", "").replaceAll("\r", "");
+        password = creds[1].replaceAll("\n", "").replaceAll("\r", "");
+
+
+        try {
+
+            Properties props = new Properties();
+            props.put("mail.transport.protocol", "smtp");
+            props.put("mail.smtp.host", SMTP_HOST_NAME);
+            props.put("mail.smtp.auth", "true");
+
+            Authenticator auth = new SMTPAuthenticator();
+            Session mailSession = Session.getDefaultInstance(props, auth);
+
+            Transport transport = mailSession.getTransport();
+
+            transport.connect();
+            MimeMessage message = null;
+            message = new MimeMessage(mailSession);
+
+            message.setSubject("Просроченные задания");
+
+            message.setFrom(new InternetAddress("sep@rosatom.ru"));
+
+            message.addRecipient(Message.RecipientType.TO,
+                    new InternetAddress("aamartynyuk@greenatom.ru"));
+
+            message.addRecipient(Message.RecipientType.TO,
+                    new InternetAddress("asreutova@greenatom.ru"));
+
+
+
+
+
+            MimeBodyPart messageBodyPart = new MimeBodyPart();
+            MimeBodyPart textBodyPart = new MimeBodyPart();
+
+
+            Multipart multipart = new MimeMultipart();
+
+            textBodyPart.setText("Добрый день! \nСроки исполнения истекли по следующим задачам:\n" + sb);
+            messageBodyPart = new MimeBodyPart();
+
+            multipart.addBodyPart(messageBodyPart);
+
+
+            multipart.addBodyPart(textBodyPart);
+            message.setContent(multipart);
+
+            transport.sendMessage(message, message.getRecipients(Message.RecipientType.TO));
+
+
+            //JOptionPane.showMessageDialog(null, "Файлы отправлены адресатам!");
+            System.exit(0);
+
+        } catch (MessagingException e1) {
+            //JOptionPane.showMessageDialog(null, "Ошибка отправки почты (возможно истек пароль к УЗ): " + e1.getMessage());
+            e1.printStackTrace();
+        } catch (Exception e) {
+            //JOptionPane.showMessageDialog(null, "Ошибка отправки почты (возможно истек пароль к УЗ): " + e.getMessage());
+            e.printStackTrace();
+        }
+
+    }
+
+    private static String[] credRead()
+    {
+        String[]creds=new String[0];
+
+        try(FileReader reader=new FileReader(CREDS_FILE_NAME))
+        {
+            char[]buf=new char[256];
+            int c;
+            while((c=reader.read(buf))>0){
+
+                if(c< 256){
+                    buf= Arrays.copyOf(buf,c);
+                }
+                creds=String.valueOf(buf).trim().replaceAll(" ","").split("\n");
+            }
+        }
+        catch(IOException ex){
+
+            System.out.println(ex.getMessage());
+        }
+
+
+        return creds;
     }
 
 

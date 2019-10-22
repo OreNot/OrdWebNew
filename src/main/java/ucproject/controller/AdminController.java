@@ -9,9 +9,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import ucproject.domain.*;
 import ucproject.repos.FioRepo;
+import ucproject.repos.GroupManagerRepo;
 import ucproject.repos.UserRepo;
 import ucproject.repos.WorkGroupRepo;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
@@ -28,6 +30,8 @@ public class AdminController {
     @Autowired
     FioRepo fioRepo;
 
+    @Autowired
+    GroupManagerRepo groupManagerRepo;
 
     @Value("${urlprefix}")
     private String urlprefixPath;
@@ -65,22 +69,67 @@ public class AdminController {
 
         Set<Role> roles = editableUser.getRoles();
 
-        if(fioRepo.findByFio(fio.trim()) == null || fioRepo.findByFioIgnoreCase(fio.trim()).equals(""))
-        {
-            newFio = new Fio(fio.trim());
-            fioRepo.save(newFio);
-        }
-        else
-        {
-            newFio = fioRepo.findByFioIgnoreCase(fio.trim());
+        if(!fio.equals("0")) {
+            if (fioRepo.findByFio(fio.trim()) == null || fioRepo.findByFioIgnoreCase(fio.trim()).equals("")) {
+                newFio = new Fio(fio.trim());
+                fioRepo.save(newFio);
+
+            } else {
+                newFio = fioRepo.findByFioIgnoreCase(fio.trim());
+            }
+
+
+        editableUser.setFio(newFio);
         }
 
         if (!roles.contains(userrole))
         {
-            //roles.add(new Role(userrole));
+            switch (userrole)
+            {
+                case "OPERATOR" :
+                {
+                    roles.add(Role.OPERATOR);
+                    break;
+                }
+
+                case "GROUPBOSS" :
+                {
+                    roles.add(Role.GROUPBOSS);
+                    break;
+                }
+
+                case "MANAGER" :
+                {
+                    roles.add(Role.MANAGER);
+                    break;
+                }
+
+                case "SUPERBOSS" :
+                {
+                    roles.add(Role.SUPERBOSS);
+                    break;
+                }
+            }
+            editableUser.setRoles(roles);
         }
 
-        editableUser.setRoles(editableUser.getRoles());
+        if (!workgroup.equals("NONE"))
+        {
+            GroupManager g = groupManagerRepo.findByUser(editableUser);
+            if (groupManagerRepo.findByUser(editableUser) == null)
+            {
+                GroupManager groupManager = new GroupManager(editableUser, workGroupRepo.findByName(workgroup));
+                groupManagerRepo.save(groupManager);
+            }
+            if (!groupManagerRepo.findByUser(editableUser).getWorkGroup().getName().equals(workGroupRepo.findByName(workgroup).getName()))
+            {
+                GroupManager groupManager = new GroupManager(editableUser, workGroupRepo.findByName(workgroup));
+                groupManagerRepo.save(groupManager);
+            }
+
+        }
+
+        userRepo.save(editableUser);
 
         Iterable<User> userlist = userRepo.findAll();
         Iterable<WorkGroup> workgroupslist = workGroupRepo.findAll();

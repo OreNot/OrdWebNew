@@ -14,6 +14,22 @@
 
 </script>
 
+<script>
+    function toggleCheckbox(elem) {
+
+        if(elem.checked)
+        {
+            document.getElementById('comment').hidden = false;
+            document.getElementById('commentlabel').hidden = false;
+        }
+        else
+        {
+            document.getElementById('comment').hidden = true;
+            document.getElementById('commentlabel').hidden = true;
+        }
+    }
+</script>
+
 
 <br>
 <div>
@@ -38,10 +54,11 @@
         </select>
         </div>
         </div>
+
         <div class="form-group row mt-3">
             <div class="col-md-10">
                 <label for="exampleFormControlTextarea1">Описание</label>
-                <textarea class="form-control" name="editabledescription" rows="5" style="min-width: 100%">${selecteddescription}</textarea>
+                <textarea class="form-control"  disabled name="editabledescription" rows="5" style="min-width: 100%">${selecteddescription}</textarea>
             </div>
         </div>
 
@@ -50,18 +67,6 @@
 
              <input type="text" class="form-control" name="editableexecdate" placeholder="Дата выполнения" value="${selectedexecdate}"/>
 
-            </div>
-        </div>
-
-        <div class="form-group row mt-3">
-            <div class="col-auto">
-                <select class="form-control" name="editableworkgroup"  placeholder="РГ">
-
-                    <#list workgroups as workgroup>
-                        <option value="${workgroup.name}" <#if workgroup.name == "${selectedworkgroup}">selected="selected"</#if>>${workgroup.name}</option>
-                    </#list>
-
-                </select>
             </div>
         </div>
 
@@ -77,14 +82,41 @@
                 <input type="file"  name="file" id="input-file-now" class="file-upload"/>
                 <label class="input-file-label" for="input-file-now">Изменить вложение</label>
             </div>
-
         <#else>
             <div class="file-upload-wrapper mb-2">
                 <input type="file"  name="file" id="input-file-now" class="file-upload"/>
                 <label class="input-file-label" for="input-file-now">Добавить вложение</label>
             </div>
+
         </#if>
+
+        <div class="form-group row mt-3">
+
+            <div class="col-auto">
+
+                Назначить исполнителя<select class="form-control" name="executor"  placeholder="Исполнители">
+                         <option value="Не назначен">Не назначен</option>
+                    <#list executorlist as executor>
+                        <option value="${executor.username}" <#if selectedexecutor??><#if executor.username == "${selectedexecutor}">selected="selected"</#if></#if>>${executor.username}</option>
+                    </#list>
+
+                </select>
+            </div>
+        </div>
+
         <input type="hidden" name="editabletid" value="${tid}">
+
+        <div class="custom-control custom-checkbox">
+            <input type="checkbox" class="custom-control-input" id="resend" name="resend" onchange="toggleCheckbox(this)">
+            <label class="custom-control-label" for="resend">Вернуть на распределение</label>
+        </div>
+
+        <div class="form-group row mt-3">
+            <div class="col-md-10">
+                <label for="comment" hidden="true" id="commentlabel">Комментарий</label>
+                <textarea class="form-control" hidden="true" name="comment" id="comment" rows="5" style="min-width: 100%" ></textarea>
+            </div>
+        </div>
 
         <div class="form-group row mt-3">
             <div class="col-sm-3">

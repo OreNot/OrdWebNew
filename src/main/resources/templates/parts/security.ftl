@@ -13,7 +13,7 @@ know = Session.SPRING_SECURITY_CONTEXT??
     isSuperBoss = user.isSuperBoss()
     isUser = user.isUser()
 
-    prefix=""
+    prefix="/OrdWebNew"
     >
 <#else>
 <#assign
@@ -24,5 +24,6 @@ isManager = false
 isGroupBoss = false
 isSuperBoss = false
 isUser = false
+prefix="/OrdWebNew"
 >
 </#if>

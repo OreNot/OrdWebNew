@@ -14,6 +14,22 @@
 
 </script>
 
+<script>
+    function toggleSelect(elem) {
+
+        if(elem.value == "Выполнено")
+        {
+            document.getElementById('report').hidden = false;
+            document.getElementById('reportlabel').hidden = false;
+        }
+        else
+        {
+            document.getElementById('report').hidden = true;
+            document.getElementById('reportlabel').hidden = true;
+        }
+    }
+</script>
+
 
 <br>
 <div>
@@ -29,39 +45,22 @@
         <div><h4>Задача</h4></div>
         <div class="form-group row mt-3">
         <div class="col-auto">
-        <select class="form-control" name="editableurgency"  placeholder="Важность">
-
-            <#list urgencys as urgency>
-                <option value="${urgency.name}" <#if urgency.name == "${selectedurgency}">selected="selected"</#if>>${urgency.name}</option>
-            </#list>
-
-        </select>
+            <span class="badge badge-pill <#if selectedurgency  =="Очень важно">badge-danger<#elseif selectedurgency  =="Важно">badge-warning<#elseif selectedurgency  =="Стандартно">badge-primary<#else>badge-light</#if>">${selectedurgency}</span>
         </div>
         </div>
+
         <div class="form-group row mt-3">
             <div class="col-md-10">
                 <label for="exampleFormControlTextarea1">Описание</label>
-                <textarea class="form-control" name="editabledescription" rows="5" style="min-width: 100%">${selecteddescription}</textarea>
+                <textarea class="form-control"  disabled name="description" rows="5" style="min-width: 100%">${description}</textarea>
             </div>
         </div>
 
         <div class="form-group row mt-3">
             <div class="col-auto">
 
-             <input type="text" class="form-control" name="editableexecdate" placeholder="Дата выполнения" value="${selectedexecdate}"/>
+             <input type="text" class="form-control" name="execdate" placeholder="Дата выполнения" value="${execdate}"/>
 
-            </div>
-        </div>
-
-        <div class="form-group row mt-3">
-            <div class="col-auto">
-                <select class="form-control" name="editableworkgroup"  placeholder="РГ">
-
-                    <#list workgroups as workgroup>
-                        <option value="${workgroup.name}" <#if workgroup.name == "${selectedworkgroup}">selected="selected"</#if>>${workgroup.name}</option>
-                    </#list>
-
-                </select>
             </div>
         </div>
 
@@ -73,18 +72,28 @@
                 Посмотреть вложение
             </a>
 
-            <div class="file-upload-wrapper mb-2">
-                <input type="file"  name="file" id="input-file-now" class="file-upload"/>
-                <label class="input-file-label" for="input-file-now">Изменить вложение</label>
-            </div>
-
-        <#else>
-            <div class="file-upload-wrapper mb-2">
-                <input type="file"  name="file" id="input-file-now" class="file-upload"/>
-                <label class="input-file-label" for="input-file-now">Добавить вложение</label>
-            </div>
         </#if>
+
+        <div class="form-group row mt-3">
+            <div class="col-auto">
+                <select class="form-control" name="status"  placeholder="Статус" onchange="toggleSelect(this)">
+
+                 <option value="В работе у исполнителя">В работе у исполнителя</option>
+                 <option value="Выполнено">Выполнено</option>
+
+                </select>
+            </div>
+        </div>
+
         <input type="hidden" name="editabletid" value="${tid}">
+
+
+        <div class="form-group row mt-3">
+            <div class="col-md-10">
+                <label for="reportlabel" hidden="true" id="reportlabel">Решение</label>
+                <textarea class="form-control" hidden="true" name="report" id="report" rows="5" style="min-width: 100%" ></textarea>
+            </div>
+        </div>
 
         <div class="form-group row mt-3">
             <div class="col-sm-3">

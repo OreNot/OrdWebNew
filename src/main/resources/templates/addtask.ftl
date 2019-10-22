@@ -1,5 +1,16 @@
 <#import "parts/common.ftl" as c>
+<#assign
+user = Session.SPRING_SECURITY_CONTEXT.authentication.principal
+name = user.getUsername()
+isAdmin = user.isAdmin()
+isOperator = user.isOperator()
+isManager = user.isManager()
+isGroupBoss = user.isGroupBoss()
+isSuperBoss = user.isSuperBoss()
+isUser = user.isUser()
 
+
+>
 <@c.page>
 <img src="${urlprefixPath}/img/greenatom.png" class="rounded float-left" width="145" height="159">
 <br>
@@ -56,10 +67,15 @@
             <div class="col-auto">
                 <select class="form-control" name="workgroup"  placeholder="РГ">
 
+
+                    <#if isAdmin || isManager || isSuperBoss>
                     <#list workgroups as workgroup>
                         <option value="${workgroup.name}">${workgroup.name}</option>
                     </#list>
-
+                    </#if>
+                    <#if isGroupBoss && !isAdmin && !isManager && !isSuperBoss>
+                        <option value="Не назначена">Не назначена</option>
+                    </#if>
                 </select>
             </div>
         </div>
