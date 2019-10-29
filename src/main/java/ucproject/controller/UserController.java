@@ -30,9 +30,6 @@ public class UserController {
     WorkGroupRepo workGroupRepo;
 
     @Autowired
-    FioRepo fioRepo;
-
-    @Autowired
     TaskRepo taskRepo;
 
     @Autowired
@@ -104,7 +101,7 @@ public class UserController {
         List<Urgency> urgencys = urgencyRepo.findAll();
 
 
-        model.put("urgency", urgency);
+        //model.put("urgency", urgency);
 
         model.put("chronos", task.getChronos());
         model.put("execdate", task.getExecDate());
@@ -112,7 +109,7 @@ public class UserController {
         model.put("selectedurgency", task.getUrgency().getName());
         model.put("taskfilepath", taskFilePath);
         model.put("taskFileName", taskFileName);
-        model.put("description", description);
+        model.put("description", task.getDescription());
         model.put("tid", tid);
         model.put("urlprefixPath", urlprefixPath);
 

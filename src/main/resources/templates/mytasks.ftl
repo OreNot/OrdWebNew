@@ -41,6 +41,7 @@
         <table class="table">
             <thead>
             <tr>
+                <th scope="col">Номер</th>
                 <th scope="col">Дата регистрации</th>
                 <th scope="col">Дата исполнения</th>
                 <th scope="col">РГ</th>
@@ -57,14 +58,14 @@
                    <tr class=<#if task.urgency.name =="Очень важно">"table-danger"<#elseif task.urgency.name =="Важно">"table-warning"<#elseif task.urgency.name =="Стандартно">"table-primary"<#else>"table-light"</#if>
                     onclick="window.open('${urlprefixPath}/showonetaskforuser?tid=${task.id}&regdata=${task.regDate}&execdate=${task.execDate}&workgroup=${task.workGroup.name}&description=${task.description}&urgency=${task.urgency.name}')">
 
-
+                    <td>${task.id}</td>
                     <td>${task.regDate}</td>
                     <td>${task.execDate}</td>
                     <td>${task.workGroup.name}</td>
                     <td>${task.description}</td>
                     <td>${task.urgency.name}</td>
                     <td>${task.status.name}</td>
-                    <td>${task.autor.username}</td>
+                    <td>${task.autor.fio}</td>
 
                 </tr>
       <#else>

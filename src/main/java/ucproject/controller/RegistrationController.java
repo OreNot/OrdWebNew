@@ -6,11 +6,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import ucproject.domain.Fio;
 import ucproject.domain.Role;
 import ucproject.domain.User;
-import ucproject.repos.FioRepo;
 import ucproject.repos.UserRepo;
 
 import java.util.Collections;
@@ -24,9 +21,6 @@ public class RegistrationController {
 
     @Autowired
     private UserRepo userRepo;
-
-    @Autowired
-    private FioRepo fioRepo;
 
     @Autowired
     private PasswordEncoder passwordEncoder;

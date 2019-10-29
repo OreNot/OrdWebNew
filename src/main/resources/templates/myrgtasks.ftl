@@ -93,6 +93,7 @@
         <table class="table">
             <thead>
             <tr>
+                <th scope="col">Номер</th>
                 <th scope="col">Дата регистрации</th>
                 <th scope="col">Дата исполнения</th>
                 <th scope="col">РГ</th>
@@ -111,19 +112,22 @@
                     onclick="window.open('${urlprefixPath}/showonetaskforgroupboss?tid=${task.id}&regdata=${task.regDate}&execdate=${task.execDate}&workgroup=${task.workGroup.name}&description=${task.description}&urgency=${task.urgency.name}')">
 
 
+                    <td>${task.id}</td>
                     <td>${task.regDate}</td>
                     <td>${task.execDate}</td>
                     <td>${task.workGroup.name}</td>
                     <td>${task.description}</td>
                     <td>${task.urgency.name}</td>
                     <td><span class="badge badge-pill <#if task.status.name  == "Выполнено">badge-success<#elseif task.status.name  == "В работе у исполнителя">badge-secondary<#elseif task.status.name  =="Назначен исполнитель">badge-warning<#else>badge-danger</#if>">${task.status.name}</span></td>
-                    <td>${task.autor.username}</td>
-                    <#if task.executor??>
-                    <td>${task.executor.username}</td>
-                    </#if>
+                    <td>${task.autor.fio}</td>
+                    <td><#if task.executor??>
+                    ${task.executor.fio}
+                    <#else>Исполнитель не назначен</#if></td>
+                    <td>
                     <#if task.report??>
-                    <td>${task.report}</td>
-                    </#if>
+                    ${task.report}
+                    <#else>Пусто</#if>
+                     </td>
                 </tr>
       <#else>
                 Пусто

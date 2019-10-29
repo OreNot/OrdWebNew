@@ -100,13 +100,13 @@
                     <td>${task.urgency.name}</td>
                 <td><span class="badge badge-pill <#if task.status.name  == "Выполнено">badge-success<#elseif task.status.name  == "В работе у исполнителя">badge-secondary<#elseif task.status.name  =="Назначен исполнитель">badge-warning<#else>badge-danger</#if>">${task.status.name}</span></td>
 
-                <td>${task.autor.username}</td>
+                <td>${task.autor.fio}</td>
                 <td><#if task.comment??>
                     ${task.comment}
                     <#else>Нет комментариев</#if></td>
 
                 <td><#if task.executor??>
-                ${task.executor.username}
+                ${task.executor.fio}
                 <#else>Исполнитель не назначен</#if></td>
 
                 <td>

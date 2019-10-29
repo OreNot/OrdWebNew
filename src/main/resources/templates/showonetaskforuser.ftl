@@ -42,7 +42,7 @@
     <div class="form-group col-md-10">
     <form method="post" enctype="multipart/form-data" id="js-upload-form">
 
-        <div><h4>Задача</h4></div>
+        <div><h4>Задача #<#if tid?has_content>${tid}</#if></h4></div>
         <div class="form-group row mt-3">
         <div class="col-auto">
             <span class="badge badge-pill <#if selectedurgency  =="Очень важно">badge-danger<#elseif selectedurgency  =="Важно">badge-warning<#elseif selectedurgency  =="Стандартно">badge-primary<#else>badge-light</#if>">${selectedurgency}</span>

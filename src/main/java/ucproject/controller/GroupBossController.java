@@ -29,9 +29,6 @@ public class GroupBossController {
     WorkGroupRepo workGroupRepo;
 
     @Autowired
-    FioRepo fioRepo;
-
-    @Autowired
     TaskRepo taskRepo;
 
     @Autowired
@@ -155,19 +152,17 @@ public class GroupBossController {
         Urgency editableurgency = urgencyRepo.findByName(urgency);
 
 
-        List<GroupManager> executorGMlist = groupManagerRepo.findByWorkGroupId(workGroup.getId());
+        GroupManager executorGM = groupManagerRepo.findByWorkGroupId(workGroup.getId());
 
         List<User> executorlist = userRepo.findAll();
 
+            //!!! Руководитель группы может быть исполнителем
 
-
-        for (GroupManager gm : executorGMlist)
-        {
-            if (!executorlist.contains(gm.getUser()))
+            if (!executorlist.contains(executorGM.getUser()))
             {
-                executorlist.remove(gm.getUser());
+                executorlist.remove(executorGM.getUser());
             }
-        }
+
 
         String selectedexecutor;
         try{
@@ -237,7 +232,7 @@ public class GroupBossController {
         String selectedexecdate = editableexecdate;
 
 
-        List<GroupManager> executorGMlist = groupManagerRepo.findByWorkGroupId(workGroup.getId());
+        GroupManager executorGM = groupManagerRepo.findByWorkGroupId(workGroup.getId());
 
         List<User> executorlist = userRepo.findAll();
         try
@@ -255,13 +250,12 @@ public class GroupBossController {
         }
         StringBuilder chronos = new StringBuilder(editableTask.getChronos());
 
-        for (GroupManager gm : executorGMlist)
-        {
-            if (!executorlist.contains(gm.getUser()))
+
+            if (!executorlist.contains(executorGM.getUser()))
             {
-                executorlist.remove(gm.getUser());
+                executorlist.remove(executorGM.getUser());
             }
-        }
+
         StringBuilder editList = new StringBuilder(addDateFormat.format(new Date()) + " Задача изменена пользователем " + user.getUsername() + ". \nСписок изменений: \n");
 
         if(resend.equals("on"))
@@ -334,10 +328,32 @@ try {
             }
             if(!(executor.equals("0") || executor.equals("Не назначен")))
             {
-                editableTask.setExecutor(userRepo.findByUsername(executor));
-                editList.append("Задаче назначен исполнитель " + executor + " \n");
+                editableTask.setExecutor(userRepo.findByFio(executor));
+                editList.append("Задаче назначен исполнитель - " + executor + " \n");
                 editableTask.setStatus(statusRepo.findByName("Назначен исполнитель"));
-                selectedexecutor = userRepo.findByUsername(executor).getUsername();
+                selectedexecutor = userRepo.findByFio(executor).getFio();
+
+                List<String> recList = new ArrayList<>();
+                if (editableTask.getExecutor() != null && editableTask.getExecutor().getEmail() != null && !editableTask.getExecutor().getEmail().equalsIgnoreCase(""))
+                {
+                    if (!recList.contains(editableTask.getExecutor().getEmail())) {
+                        recList.add(editableTask.getExecutor().getEmail());
+                    }
+                }
+
+                if (!recList.contains(userRepo.findByFio(executor).getEmail())) {
+                    recList.add(userRepo.findByFio(executor).getEmail());
+                }
+
+                Mail mail = new Mail();
+                mail.setRecepientList(recList);
+                mail.setTheme("Вы назначены исполнителем для задачи #" + editableTask.getId());
+                mail.setText("Добрый день!\n" +
+                        "Вы назначены руководителем Вашей РГ в качестве исполнителя для задачи #" + editableTask.getId() + "\n" +
+                        // "Задача: http://10.161.193.164:8080/" + urlprefixPath + "/showonetaskforuser?tid=" + task.getId());
+                        "Задача: http://localhost:8080" + urlprefixPath + "/showonetaskforuser?tid=" + editableTask.getId());
+
+                ManagerController.mailSending(mail);
             }
             else
             {

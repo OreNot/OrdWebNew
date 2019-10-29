@@ -16,7 +16,18 @@
         </div>
     </div>
     <#if isRegisterForm>
-
+        <div class="form-group row mt-3">
+            <label class="col-sm-2 col-form-label"> Ф.И.О : </label>
+            <div class="col-sm-3">
+                <input type="text" name="fio" class="form-control" placeholder="Ф.И.О"/>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label  class="col-sm-2 col-form-label"> E-mail:  </label>
+            <div class="col-sm-3">
+                <input type="text" name="email" class="form-control" placeholder="E-mail"/>
+            </div>
+        </div>
     </#if>
 
      <div class="form-group row">

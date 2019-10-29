@@ -121,7 +121,7 @@
                 <option value="Исполнитель">Исполнитель</option>
                 <option value="Все">Все</option>
                 <#list executors as executor>
-                    <option value="${executor.username}">${executor.username}</option>
+                    <option value="${executor.fio}">${executor.fio}</option>
                 </#list>
 
             </select>
@@ -139,6 +139,7 @@
         <table class="table">
             <thead>
             <tr>
+                <th scope="col">Номер</th>
                 <th scope="col">Дата регистрации</th>
                 <th scope="col">Дата исполнения</th>
                 <th scope="col">РГ</th>
@@ -157,7 +158,7 @@
                         <tr class=<#if task.urgency.name =="Очень важно">"table-danger"<#elseif task.urgency.name =="Важно">"table-warning"<#elseif task.urgency.name =="Стандартно">"table-primary"<#else>"table-light"</#if>
                     onclick="window.open('${urlprefixPath}/showonetaskformanager?tid=${task.id}&regdata=${task.regDate}&execdate=${task.execDate}&workgroup=${task.workGroup.name}&description=${task.description}&urgency=${task.urgency.name}')">
 
-
+                    <td>${task.id}</td>
                     <td>${task.regDate}</td>
                     <td>${task.execDate}</td>
                     <td>${task.workGroup.name}</td>
@@ -165,13 +166,13 @@
                     <td>${task.urgency.name}</td>
                 <td><span class="badge badge-pill <#if task.status.name  == "Выполнено">badge-success<#elseif task.status.name  == "В работе у исполнителя">badge-secondary<#elseif task.status.name  =="Назначен исполнитель">badge-warning<#else>badge-danger</#if>">${task.status.name}</span></td>
 
-                <td>${task.autor.username}</td>
+                <td>${task.autor.fio}</td>
                 <td><#if task.comment??>
                     ${task.comment}
                     <#else>Нет комментариев</#if></td>
 
                 <td><#if task.executor??>
-                ${task.executor.username}
+                ${task.executor.fio}
                 <#else>Исполнитель не назначен</#if></td>
 
                 <td>

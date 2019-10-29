@@ -11,7 +11,7 @@ public class GroupManager {
     @SequenceGenerator(name = "groupmanager_seq_gen", sequenceName = "groupmanager_sequence", initialValue = 1, allocationSize = 1)
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     @JoinColumn(name = "user_id")
     private User user;
 

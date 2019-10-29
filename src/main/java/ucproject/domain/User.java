@@ -14,16 +14,18 @@ public class User implements UserDetails{
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq_gen")
-    @SequenceGenerator(name = "user_seq_gen", sequenceName = "user_sequence", initialValue = 3, allocationSize = 1)
+    @SequenceGenerator(name = "user_seq_gen", sequenceName = "user_sequence", initialValue = 2, allocationSize = 1)
     private Integer id;
     @NotBlank(message = "Username not null")
     private String username;
     @NotBlank(message = "pass not null")
     private String password;
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
-    @JoinColumn(name = "fio_id")
-    private Fio fio;
+    @NotBlank(message = "fio not null")
+    private String fio;
+
+    @NotBlank(message = "email not null")
+    private String email;
 
     private boolean active;
 
@@ -42,11 +44,11 @@ public class User implements UserDetails{
     public boolean isSuperBoss() { return roles.contains(Role.SUPERBOSS); }
     public boolean isUser() { return roles.contains(Role.USER); }
 
-    public Fio getFio() {
+    public String getFio() {
         return fio;
     }
 
-    public void setFio(Fio fio) {
+    public void setFio(String fio) {
         this.fio = fio;
     }
 
@@ -113,5 +115,13 @@ public class User implements UserDetails{
 
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 }

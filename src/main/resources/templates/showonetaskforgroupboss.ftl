@@ -42,7 +42,7 @@
     <div class="form-group col-md-10">
     <form method="post" enctype="multipart/form-data" id="js-upload-form">
 
-        <div><h4>Задача</h4></div>
+        <div><h4>Задача #<#if tid?has_content>${tid}</#if></h4></div>
         <div class="form-group row mt-3">
         <div class="col-auto">
         <select class="form-control" name="editableurgency"  placeholder="Важность">
@@ -97,7 +97,7 @@
                 Назначить исполнителя<select class="form-control" name="executor"  placeholder="Исполнители">
                          <option value="Не назначен">Не назначен</option>
                     <#list executorlist as executor>
-                        <option value="${executor.username}" <#if selectedexecutor??><#if executor.username == "${selectedexecutor}">selected="selected"</#if></#if>>${executor.username}</option>
+                        <option value="${executor.fio}" <#if selectedexecutor??><#if executor.fio == "${selectedexecutor}">selected="selected"</#if></#if>>${executor.fio}</option>
                     </#list>
 
                 </select>

@@ -8,12 +8,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import ucproject.domain.*;
-import ucproject.repos.FioRepo;
 import ucproject.repos.GroupManagerRepo;
 import ucproject.repos.UserRepo;
 import ucproject.repos.WorkGroupRepo;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
@@ -27,8 +25,6 @@ public class AdminController {
     @Autowired
     WorkGroupRepo workGroupRepo;
 
-    @Autowired
-    FioRepo fioRepo;
 
     @Autowired
     GroupManagerRepo groupManagerRepo;
@@ -65,21 +61,14 @@ public class AdminController {
 
 
         User editableUser = userRepo.findByUsername(username);
-        Fio newFio;
 
         Set<Role> roles = editableUser.getRoles();
 
         if(!fio.equals("0")) {
-            if (fioRepo.findByFio(fio.trim()) == null || fioRepo.findByFioIgnoreCase(fio.trim()).equals("")) {
-                newFio = new Fio(fio.trim());
-                fioRepo.save(newFio);
+            if (editableUser.getFio().trim() == null || !editableUser.getFio().trim().equalsIgnoreCase(fio.trim())) {
+                editableUser.setFio(fio.trim());
 
-            } else {
-                newFio = fioRepo.findByFioIgnoreCase(fio.trim());
             }
-
-
-        editableUser.setFio(newFio);
         }
 
         if (!roles.contains(userrole))

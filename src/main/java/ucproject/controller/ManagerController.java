@@ -22,6 +22,7 @@ import javax.swing.*;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.ParseException;
@@ -45,16 +46,19 @@ public class ManagerController {
     TaskRepo taskRepo;
 
     @Autowired
-    FioRepo fioRepo;
+    UserRepo userRepo;
 
     @Autowired
-    UserRepo userRepo;
+    GroupManagerRepo groupManagerRepo;
 
     @Value("${urlprefix}")
     private String urlprefixPath;
 
     @Value("${manupload.path}")
     private String manUpPath;
+
+    @Value("${smtpserver}")
+    private String smtpserver;
 
     SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
     SimpleDateFormat dateFormatForDateField = new SimpleDateFormat("yyyy-MM-dd");
@@ -68,7 +72,7 @@ public class ManagerController {
 
     private static String CREDS_FILE_NAME = "C:\\Creds\\creds.txt";
 
-    private static final String SMTP_HOST_NAME = "core-s-exh01.gk.rosatom.local";
+    private static String SMTP_HOST_NAME = "core-s-exh01.gk.rosatom.local";
 
     @GetMapping("/addtask")
     public String addtask(Map<String, Object> model) {
@@ -97,7 +101,8 @@ public class ManagerController {
             Map<String, Object> model) {
 
         String userName = user.getUsername();
-        Fio fio = user.getFio();
+        //Fio fio = user.getFio();
+        String fio = user.getFio();
         File destFile = null;
 
         if (!urgency.equals("0") && !description.equals("0") && !execdate.equals("0") && !workgroup.equals("0")) {
@@ -144,7 +149,7 @@ public class ManagerController {
 
 
 
-            String chronos = addDateFormat.format(new Date()) + " Задача зарегистрирована " + userName;
+            String chronos = addDateFormat.format(new Date()) + " Задача зарегистрирована " + userName + "\n";
 
 
 
@@ -156,7 +161,27 @@ public class ManagerController {
             taskRepo.save(newTask);
 
 
+            List<String> recList = new ArrayList<>();
+            if (newTask.getWorkGroup() != null)
+            {
+                GroupManager gm = groupManagerRepo.findByWorkGroupId(newTask.getWorkGroup().getId());
+                User groupBoss = gm.getUser();
+                if (!recList.contains(groupBoss.getEmail())) {
+                    recList.add(groupBoss.getEmail());
+                }
+            }
 
+            Mail mail = new Mail();
+            mail.setRecepientList(recList);
+            mail.setTheme("Новая задача для РГ #" + newTask.getId());
+            mail.setText("Добрый день!\n" +
+                    "Для Вашей РГ зарегистрирована новая задача #" + newTask.getId() + "\n" +
+                    // "Задача: http://10.161.193.164:8080/" + urlprefixPath + "/showonetaskforuser?tid=" + task.getId());
+                    "Задача: http://localhost:8080" + urlprefixPath + "/showonetaskforgroupboss?tid=" + newTask.getId());
+
+
+
+            mailSending(mail);
 
 
 
@@ -190,27 +215,117 @@ public class ManagerController {
         )
     {
         Iterable<Task> tasks = taskRepo.findAll();
-        //Iterable<Task> tasks = taskRepo.findByStatus(statusRepo.findByName(status));
-        /*
-        StringBuilder sb = new StringBuilder();
+        List<Task> warTasks = new ArrayList<>();
+        List<Task> alarmTasks = new ArrayList<>();
+
         for (Task task : tasks)
         {
             try {
-                Date execDate = dateFormat.parse(task.getExecDate());
-                if (execDate.after(new Date()))
+                Date taskDate = dateFormat.parse(task.getExecDate());
+                long milliseconds = new Date().getTime() - taskDate.getTime();
+                int days = (int) (milliseconds / (24 * 60 * 60 * 1000));
+                String chrt = task.getChronos().toUpperCase();
+                String str = "Срок исполнения задачи истёк".toUpperCase();
+                boolean chr = chrt.contains(str);
+                if (days >= 0 && !task.getChronos().toUpperCase().contains("Срок исполнения задачи истёк".toUpperCase()))
                 {
-                    sb.append("Исполнитель: " + task.getExecutor().getUsername() + "\n РГ: " + task.getWorkGroup().getName() + "\n Описание: \n" + task.getDescription() + "\n"  );
+                   alarmTasks.add(task);
+                   task.setChronos(task.getChronos() + addDateFormat.format(new Date()) + " Срок исполнения задачи истёк. Задача возвращена на распределение.\n");
+                   task.setStatus(statusRepo.findByName("Возвращено на распределение"));
+                   //task.setUrgency(urgencyRepo.findByName("Важно"));
+                   task.setWorkGroup(workGroupRepo.findByName("Не назначена"));
+
                 }
+                if (days == -3 && !task.getChronos().toUpperCase().contains("Срок исполения задачи истекает".toUpperCase()) && !task.getChronos().toUpperCase().contains("срок исполения задачи истекает чере 3 дня".toUpperCase()))
+                {
+                    warTasks.add(task);
+                    task.setChronos(task.getChronos() + addDateFormat.format(new Date()) + " Срок исполения задачи истекает через 3 дня.\n");
+                }
+
+
 
             } catch (ParseException e) {
                 e.printStackTrace();
             }
         }
-        if (!sb.toString().equals(""))
+
+        if (!warTasks.isEmpty())
         {
-            //mailSending(sb.toString());
+            for (Task task : warTasks)
+            {
+                List<String> recList = new ArrayList<>();
+                if (task.getExecutor() != null && task.getExecutor().getEmail() != null && !task.getExecutor().getEmail().equalsIgnoreCase(""))
+                {
+                    if (!recList.contains(task.getExecutor().getEmail())) {
+                        recList.add(task.getExecutor().getEmail());
+                    }
+                }
+
+                if (task.getWorkGroup() != null)
+                {
+                    GroupManager gm = groupManagerRepo.findByWorkGroupId(task.getWorkGroup().getId());
+                    User groupBoss = gm.getUser();
+                    if (!recList.contains(groupBoss.getEmail())) {
+                        recList.add(groupBoss.getEmail());
+                    }
+                }
+
+                Mail mail = new Mail();
+                mail.setRecepientList(recList);
+                mail.setTheme("Cрок исполения задачи #" + task.getId() + " скоро истекает");
+                mail.setText("Добрый день!\n" +
+                        "Срок исполнения задачи #" + task.getId() + " истекает через 3 дня.\n" +
+                       // "Задача: http://10.161.193.164:8080/" + urlprefixPath + "/showonetaskforuser?tid=" + task.getId());
+                       "Задача: http://localhost:8080" + urlprefixPath + "/showonetaskforuser?tid=" + task.getId());
+
+
+                System.out.println("");
+                mailSending(mail);
+
+
+            }
         }
-*/
+
+        if (!alarmTasks.isEmpty())
+        {
+            for (Task task : alarmTasks)
+            {
+                List<String> recList = new ArrayList<>();
+                if (task.getExecutor() != null && task.getExecutor().getEmail() != null && !task.getExecutor().getEmail().equalsIgnoreCase(""))
+                {
+                    if (!recList.contains(task.getExecutor().getEmail())) {
+                        recList.add(task.getExecutor().getEmail());
+                    }
+                }
+
+                if (task.getWorkGroup() != null)
+                {
+                    GroupManager gm = groupManagerRepo.findByWorkGroupId(task.getWorkGroup().getId());
+                    User groupBoss = gm.getUser();
+                    if (!recList.contains(groupBoss.getEmail())) {
+                        recList.add(groupBoss.getEmail());
+                    }
+                }
+
+                Mail mail = new Mail();
+                mail.setRecepientList(recList);
+                mail.setTheme("Cрок исполения задачи #" + task.getId() + " истёк");
+                mail.setText("Добрый день!\n" +
+                        "Срок исполнения задачи #" + task.getId() + " истёк.\n" +
+                        "Задача возвращена на распределение.\n" +
+                        // "Задача: http://10.161.193.164:8080/" + urlprefixPath + "/showonetaskforuser?tid=" + task.getId());
+                        "Задача: http://localhost:8080" + urlprefixPath + "/showonetaskforuser?tid=" + task.getId());
+
+
+                System.out.println("");
+                mailSending(mail);
+
+
+            }
+        }
+
+
+
         Iterable<Urgency> urgencys;
         Iterable<Status> statuses;
         Iterable<WorkGroup> workgroups;
@@ -262,7 +377,7 @@ public class ManagerController {
                 break;
 
             case "executorfilter":
-                tasks = !executor.equals("Исполнитель") && !executor.equals("Все") ? taskRepo.findByExecutor(userRepo.findByUsername(executor)) : taskRepo.findAll();
+                tasks = !executor.equals("Исполнитель") && !executor.equals("Все") ? taskRepo.findByExecutor(userRepo.findByFio(executor)) : taskRepo.findAll();
 
                 break;
         }
@@ -504,7 +619,7 @@ public class ManagerController {
         }
     }
 
-    static void mailSending(String sb) {
+    static void mailSending(Mail mail) {
 
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DATE, -1);
@@ -539,37 +654,30 @@ public class ManagerController {
             MimeMessage message = null;
             message = new MimeMessage(mailSession);
 
-            message.setSubject("Просроченные задания");
+            message.setSubject(mail.getTheme());
 
             message.setFrom(new InternetAddress("sep@rosatom.ru"));
 
             message.addRecipient(Message.RecipientType.TO,
                     new InternetAddress("aamartynyuk@greenatom.ru"));
 
-            message.addRecipient(Message.RecipientType.TO,
-                    new InternetAddress("asreutova@greenatom.ru"));
+            for (String recepient : mail.getRecepientList())
+            {
+                message.addRecipient(Message.RecipientType.TO,
+                        new InternetAddress(recepient));
+            }
 
-
-
-
-
-            MimeBodyPart messageBodyPart = new MimeBodyPart();
             MimeBodyPart textBodyPart = new MimeBodyPart();
 
 
             Multipart multipart = new MimeMultipart();
 
-            textBodyPart.setText("Добрый день! \nСроки исполнения истекли по следующим задачам:\n" + sb);
-            messageBodyPart = new MimeBodyPart();
-
-            multipart.addBodyPart(messageBodyPart);
-
+            textBodyPart.setText(mail.getText());
 
             multipart.addBodyPart(textBodyPart);
             message.setContent(multipart);
-
             transport.sendMessage(message, message.getRecipients(Message.RecipientType.TO));
-
+            transport.close();
 
             //JOptionPane.showMessageDialog(null, "Файлы отправлены адресатам!");
             System.exit(0);
@@ -608,6 +716,7 @@ public class ManagerController {
 
         return creds;
     }
+
 
 
 }

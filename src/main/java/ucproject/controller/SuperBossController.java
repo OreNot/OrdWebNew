@@ -70,7 +70,7 @@ public class SuperBossController {
 
         for (User executor : executors)
         {
-            countbyexecutors.put(executor.getUsername(), String.valueOf(taskRepo.countByExecutorAndStatusNot(executor,statusRepo.findByName("Выполнено"))));
+            countbyexecutors.put(executor.getFio(), String.valueOf(taskRepo.countByExecutorAndStatusNot(executor,statusRepo.findByName("Выполнено"))));
         }
 
         for (WorkGroup workGroup : wprkGroups)
@@ -120,7 +120,7 @@ public class SuperBossController {
         Map<String, String> countbyworkgroups = new HashMap<>();
 
         for (User executor : executors) {
-            countbyexecutors.put(executor.getUsername(), String.valueOf(taskRepo.countByExecutorAndStatusNot(executor, statusRepo.findByName("Выполнено"))));
+            countbyexecutors.put(executor.getFio(), String.valueOf(taskRepo.countByExecutorAndStatusNot(executor, statusRepo.findByName("Выполнено"))));
         }
 
         for (WorkGroup workGroup : wprkGroups) {
@@ -184,8 +184,8 @@ public class SuperBossController {
                         (task.getTaskFileName() != null && task.getTaskFileName().replaceAll(" ", "").toLowerCase().contains(findCriteria.replaceAll(" ", ""))) ||
                         task.getChronos().replaceAll(" ", "").toLowerCase().contains(findCriteria.replaceAll(" ", "")) ||
                         (task.getComment() != null && task.getComment().replaceAll(" ", "").toLowerCase().contains(findCriteria.replaceAll(" ", ""))) ||
-                        (task.getExecutor() != null && task.getExecutor().getUsername().replaceAll(" ", "").toLowerCase().contains(findCriteria.replaceAll(" ", ""))) ||
-                        task.getAutor().getUsername().replaceAll(" ", "").toLowerCase().contains(findCriteria.replaceAll(" ", "")) ||
+                        (task.getExecutor() != null && task.getExecutor().getFio().replaceAll(" ", "").toLowerCase().contains(findCriteria.replaceAll(" ", ""))) ||
+                        task.getAutor().getFio().replaceAll(" ", "").toLowerCase().contains(findCriteria.replaceAll(" ", "")) ||
                         task.getRegDate().contains(findCriteria) ||
                         (task.getReport() != null && task.getReport().replaceAll(" ", "").toLowerCase().contains(findCriteria.replaceAll(" ", "")))
                         )
