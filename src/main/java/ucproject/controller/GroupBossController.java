@@ -148,11 +148,47 @@ public class GroupBossController {
             taskFilePath = null;
             taskFileName = null;
         }
-        WorkGroup workGroup = workGroupRepo.findByName(workgroup);
-        Urgency editableurgency = urgencyRepo.findByName(urgency);
+        WorkGroup workGroup;
+        if (workgroup.equals("0"))
+        {
+            workGroup = task.getWorkGroup();
+        }
+        else {
+            workGroup = workGroupRepo.findByName(workgroup);
+        }
+        Urgency editableurgency;
+
+        if(urgency.equals("0"))
+        {
+            editableurgency = task.getUrgency();
+        }
+        else
+        {
+            editableurgency = urgencyRepo.findByName(urgency);
+        }
 
 
-        GroupManager executorGM = groupManagerRepo.findByWorkGroupId(workGroup.getId());
+
+        List<GroupManager> executorGMList = groupManagerRepo.findByWorkGroupId(workGroup.getId());
+        GroupManager executorGM = null;
+
+        if (executorGMList.size() == 1)
+        {
+            executorGM =  executorGMList.get(0);
+        }
+        else {
+
+            for (GroupManager gm : executorGMList) {
+
+                if (gm.getUser().getRoles().contains(Role.GROUPBOSS))
+                {
+                    executorGM = gm;
+                    break;
+                }
+
+
+            }
+        }
 
         List<User> executorlist = userRepo.findAll();
 
@@ -179,8 +215,8 @@ public class GroupBossController {
         model.put("taskFileName", taskFileName);
         model.put("selectedurgency", editableurgency.getName());
         model.put("selectedexecutor", selectedexecutor);
-        model.put("selecteddescription", description);
-        model.put("selectedexecdate", execdate);
+        model.put("selecteddescription", description.equals("0") ? task.getDescription() : description);
+        model.put("selectedexecdate", execdate.equals("0") ? task.getExecDate() : execdate);
         model.put("selectedworkgroup", workGroup.getName());
         model.put("tid", tid);
 
@@ -232,7 +268,26 @@ public class GroupBossController {
         String selectedexecdate = editableexecdate;
 
 
-        GroupManager executorGM = groupManagerRepo.findByWorkGroupId(workGroup.getId());
+        List<GroupManager> executorGMList = groupManagerRepo.findByWorkGroupId(workGroup.getId());
+        GroupManager executorGM = null;
+
+        if (executorGMList.size() == 1)
+        {
+            executorGM =  executorGMList.get(0);
+        }
+        else {
+
+            for (GroupManager gm : executorGMList) {
+
+                if (gm.getUser().getRoles().contains(Role.GROUPBOSS))
+                {
+                    executorGM = gm;
+                    break;
+                }
+
+
+            }
+        }
 
         List<User> executorlist = userRepo.findAll();
         try

@@ -16,12 +16,16 @@ public interface TaskRepo extends JpaRepository<Task, Integer> {
     Integer countByWorkGroupAndUrgencyAndStatusNot(WorkGroup workGroup, Urgency urgency, Status status);
     List<Task> findByStatusNameAndWorkGroupName(String status, String workgroup);
     List<Task> findByStatusName(String status);
+    List<Task> findByStatusNameNot(String status);
+    List<Task> findByUrgencyNameAndStatusNameNot(String urgency, String status);
     List<Task> findByUrgencyName(String urgency);
     List<Task> findByUrgencyNameAndWorkGroupName(String urgency, String workgroup);
     List<Task> findByExecutorNull();
     List<Task> findByExecutor(User user);
     List<Task> findByExecutorAndStatusNot(User user, Status status);
+    List<Task> findByExecutorAndStatusNameNot(User user, String status);
     List<Task> findAll();
     Optional<Task> findById(Integer id);
     List<Task> findByworkGroupName(String workGroup);
+    List<Task> findByworkGroupNameAndStatusNameNot(String workGroup, String statusName);
 }

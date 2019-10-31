@@ -64,10 +64,10 @@
 
         <div class="form-check form-check-inline">
 
-            <input type="radio" class="form-check-input" name="radiofilter" onclick="radioClick(this)" value="statusfilter" checked="true">
+            <input type="radio" class="form-check-input" name="radiofilter" onclick="radioClick(this)" value="statusfilter" <#if radiofilterset  == "statusfilter">checked="true"</#if>>
 
 
-        <select class="form-control" name="status" id="status" placeholder="Статус" onchange="toggleSelect(this)">
+        <select class="form-control" name="status" <#if radiofilterset  != "statusfilter">disabled</#if> id="status" placeholder="Статус" onchange="toggleSelect(this)">
             <option value="Статус">Статус</option>
             <option value="Все">Все</option>
             <#list statuses as status>
@@ -81,10 +81,10 @@
 
         <div class="form-check form-check-inline mt-3">
 
-            <input type="radio" class="form-check-input" name="radiofilter" onclick="radioClick(this)" value="urgencyfilter">
+            <input type="radio" class="form-check-input" name="radiofilter" onclick="radioClick(this)" value="urgencyfilter" <#if radiofilterset  == "urgencyfilter">checked="true"</#if>>
 
 
-            <select class="form-control" name="urgency" disabled id="urgency" placeholder="Срочность" onchange="toggleSelect(this)">
+            <select class="form-control" name="urgency" <#if radiofilterset  != "urgencyfilter">disabled</#if> id="urgency" placeholder="Срочность" onchange="toggleSelect(this)">
                 <option value="Срочность">Важность</option>
                 <option value="Все">Все</option>
                   <#list urgencys as urgency>
@@ -98,10 +98,10 @@
 
         <div class="form-check form-check-inline mt-3">
 
-            <input type="radio" class="form-check-input" name="radiofilter" onclick="radioClick(this)" value="workgroupfilter">
+            <input type="radio" class="form-check-input" name="radiofilter" onclick="radioClick(this)" value="workgroupfilter" <#if radiofilterset  == "workgroupfilter">checked="true"</#if>>
 
 
-            <select class="form-control" name="workgroup" disabled id="workgroup" placeholder="РГ" onchange="toggleSelect(this)">
+            <select class="form-control" name="workgroup" <#if radiofilterset  != "workgroupfilter">disabled</#if> id="workgroup" placeholder="РГ" onchange="toggleSelect(this)">
                 <option value="РГ">РГ</option>
                 <option value="Все">Все</option>
                 <#list workgroups as workgroup>
@@ -114,10 +114,10 @@
         <br>
         <div class="form-check form-check-inline mt-3">
 
-            <input type="radio" class="form-check-input" name="radiofilter" onclick="radioClick(this)" value="executorfilter">
+            <input type="radio" class="form-check-input" name="radiofilter" onclick="radioClick(this)" value="executorfilter" <#if radiofilterset  == "executorfilter">checked="true"</#if>>
 
 
-            <select class="form-control" name="executor" disabled id="executor" placeholder="Исполнитель" onchange="toggleSelect(this)">
+            <select class="form-control" name="executor" <#if radiofilterset  != "executorfilter">disabled</#if> id="executor" placeholder="Исполнитель" onchange="toggleSelect(this)">
                 <option value="Исполнитель">Исполнитель</option>
                 <option value="Все">Все</option>
                 <#list executors as executor>
@@ -127,6 +127,12 @@
             </select>
 
         </div>
+        <br>
+        <div class="custom-control custom-checkbox">
+            <input type="checkbox" class="custom-control-input" id="finished" name="finished" <#if finished == "on">checked</#if> onchange="toggleCheckbox(this)">
+            <label class="custom-control-label"  for="finished">Исключая завершенные</label>
+        </div>
+
         <br>
         <div class="form-group row mt-3">
             <div class="col-sm-3">

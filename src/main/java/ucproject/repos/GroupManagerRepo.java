@@ -11,5 +11,5 @@ import java.util.List;
 public interface GroupManagerRepo extends JpaRepository<GroupManager, Integer> {
     List<GroupManager> findAll();
     GroupManager findByUser(User user);
-    GroupManager findByWorkGroupId(int id);
+    List<GroupManager> findByWorkGroupId(int id);
 }
