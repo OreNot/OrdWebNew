@@ -4,6 +4,7 @@ package ucproject.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -11,19 +12,18 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import ucproject.UserCatalog;
 import ucproject.UserFile;
+import ucproject.domain.User;
 import ucproject.repos.UrgencyRepo;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Stream;
 
 @Controller
 @PreAuthorize("hasAuthority('OPERATOR')")
@@ -42,6 +42,9 @@ public class OperatorController {
     UrgencyRepo urgencyRepo;
 
     SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss ");
+    SimpleDateFormat dayDateFormat = new SimpleDateFormat("dd.MM.yyyy");
+
+
 
     @GetMapping("/addtoarchive")
     public String addtoarchive(Map<String, Object> model) {
@@ -66,6 +69,7 @@ public class OperatorController {
             @RequestParam("file") MultipartFile file,
             @RequestParam(required = false, defaultValue = "0") String organization,
             @RequestParam(required = false, defaultValue = "0") String catnum,
+            @AuthenticationPrincipal User user,
             Map<String, Object> model) {
 
 
@@ -104,7 +108,9 @@ public class OperatorController {
             File destFile = new File(fioDir + "/" + resultFileName);
             try {
                 file.transferTo(destFile);
-                logging("Файл \"" + resultFileName + "\" добавлен в архив");
+
+                logging("Файл \"" + resultFileName + "\" добавлен в архив пользователем " + user.getUsername());
+                model.put("error", "Документы добавлены");
             } catch (IOException e) {
                 logging("Ошибка добавления файла \"" + resultFileName + "\" в архив");
                 e.printStackTrace();
@@ -261,13 +267,89 @@ public class OperatorController {
     private void logging(String text)
     {
 
-        try(PrintWriter output = new PrintWriter(new FileWriter(logPath,true)))
-        {
-            output.printf("%s\r\n", dateFormat.format(new Date()) + text);
+       //try(PrintWriter output = new PrintWriter(new FileWriter(logPath,true)))
+       try(Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(logPath, true), "UTF-8")))
+       //try(PrintWriter output = new PrintWriter(new OutputStreamWriter(new FileOutputStream(logPath), StandardCharsets.UTF_8), true))
+       {
+            writer.append(dateFormat.format(new Date()) + text + "\r\n");
         }
         catch (Exception e) {
 
             e.printStackTrace();
         }
+    }
+    @GetMapping("/archivelog")
+    public String showarchivelog(Map<String, Object> model) {
+
+        String error;
+        Set<String> log = logFileReading(logPath);
+
+        if (log.contains("Log file read error")) {
+            model.put("error", log);
+        } else {
+            int countToday = 0;
+            int countYersterday = 0;
+            int monthCounter = 0;
+            for (String logStr : log)
+            {
+                try {
+                    Date logDate = dayDateFormat.parse(logStr.substring(0, 10));
+                    if (logStr.substring(logStr.indexOf(".") + 1, 10).equals(dayDateFormat.format(new Date()).substring(dayDateFormat.format(new Date()).indexOf(".") + 1, 10)))
+                    {
+                        monthCounter++;
+                    }
+                     switch (getDateDifferent(logDate)) {
+                         case 1:
+                             countYersterday++;
+                             break;
+
+                         case 0:
+                             countToday++;
+                     }
+
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+                catch (StringIndexOutOfBoundsException e)
+                {
+                    e.printStackTrace();
+                }
+            }
+            model.put("countToday",countToday);
+            model.put("countYersterday",countYersterday);
+            model.put("monthCounter",monthCounter);
+            model.put("log", logFileReading(logPath));
+        }
+
+        model.put("urlprefixPath", urlprefixPath);
+
+        return "archivelog";
+
+    }
+
+    private int getDateDifferent(Date date)
+    {
+        long milliseconds = new Date().getTime() - date.getTime();
+        int days = (int) (milliseconds / (24 * 60 * 60 * 1000));
+
+        return days;
+    }
+
+    private Set<String> logFileReading(String logFilePath)
+    {
+        Set<String> sb = new HashSet<>();
+        Path path = Paths.get(logFilePath);
+        try (Stream<String> lines = Files.lines(path)) {
+            lines.forEach(s -> sb.add(s));
+        } catch (IOException ex) {
+            sb.add("Log file read error");
+            return sb;
+        }
+
+        List list = new ArrayList(sb);
+        Collections.sort(list, Collections.reverseOrder());
+        sb.clear();
+        Set<String> reverceSb =  new LinkedHashSet(list);
+        return reverceSb;
     }
 }

@@ -67,6 +67,11 @@
             <a class="nav-link" href="${urlprefixPath}/mytasks">Мои задачи</a>
         </li>
 </#if>
+    <#if isAdmin || isOperator>
+        <li class="nav-item">
+            <a class="nav-link" href="${urlprefixPath}/archivelog">Лог архива</a>
+        </li>
+    </#if>
         </ul>
 
         <div class="navbar-text mr-3">${name}</div>

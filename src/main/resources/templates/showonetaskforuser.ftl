@@ -38,6 +38,15 @@
     </#if>
 </div>
 <br>
+
+<div class="form-group row mt-3">
+    <div class="col-sm-3">
+        <button class="btn btn-primary mb-2" onclick="window.close()">Закрыть</button>
+
+    </div>
+</div>
+
+
 <div class="form-row">
     <div class="form-group col-md-10">
     <form method="post" enctype="multipart/form-data" id="js-upload-form">
@@ -121,6 +130,7 @@
     </form>
     </div>
 </div>
+
 <br>
 
 

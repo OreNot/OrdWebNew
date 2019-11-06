@@ -77,7 +77,7 @@
 
         <div class="form-group row mt-3">
             <div class="col-sm-3">
-    <button type="submit" class="btn btn-primary mb-2">Создать задачу</button>
+    <button type="submit" class="btn btn-primary mb-2" hidden>Создать задачу</button>
 
             </div>
         </div>

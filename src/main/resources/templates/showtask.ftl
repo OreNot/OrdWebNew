@@ -50,6 +50,10 @@
 
        document.getElementById("submit").click();
     }
+
+    function toggleCheckbox(elem) {
+        document.getElementById("submit").click();
+    }
 </script>
 
 <div>
@@ -71,7 +75,7 @@
             <option value="Статус">Статус</option>
             <option value="Все">Все</option>
             <#list statuses as status>
-                <option value="${status.name}">${status.name}</option>
+                <option <#if statusset?has_content && statusset  == "${status.name}">selected</#if> value="${status.name}">${status.name}</option>
             </#list>
 
         </select>
@@ -88,7 +92,7 @@
                 <option value="Срочность">Важность</option>
                 <option value="Все">Все</option>
                   <#list urgencys as urgency>
-                    <option value="${urgency.name}">${urgency.name}</option>
+                    <option <#if urgencyset?has_content && urgencyset  == "${urgency.name}">selected</#if> value="${urgency.name}">${urgency.name}</option>
                 </#list>
 
             </select>
@@ -105,7 +109,7 @@
                 <option value="РГ">РГ</option>
                 <option value="Все">Все</option>
                 <#list workgroups as workgroup>
-                    <option value="${workgroup.name}">${workgroup.name}</option>
+                    <option <#if workgroupset?has_content && workgroupset  == "${workgroup.name}">selected</#if> value="${workgroup.name}">${workgroup.name}</option>
                 </#list>
 
             </select>
@@ -121,7 +125,7 @@
                 <option value="Исполнитель">Исполнитель</option>
                 <option value="Все">Все</option>
                 <#list executors as executor>
-                    <option value="${executor.fio}">${executor.fio}</option>
+                    <option <#if executorset?has_content && executorset  == "${executor.fio}">selected</#if> value="${executor.fio}">${executor.fio}</option>
                 </#list>
 
             </select>

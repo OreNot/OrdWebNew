@@ -35,6 +35,10 @@
 
         document.getElementById("submit").click();
     }
+
+    function toggleCheckbox(elem) {
+        document.getElementById("submit").click();
+    }
 </script>
 <br>
 <div>
@@ -47,17 +51,16 @@
     <div class="form-group col-md-10">
     <form method="post" enctype="multipart/form-data" id="js-upload-form">
 
-
         <div class="form-check form-check-inline">
 
-            <input type="radio" class="form-check-input" name="radiofilter" onclick="radioClick(this)" value="statusfilter" checked="true">
+            <input type="radio" class="form-check-input" name="radiofilter" onclick="radioClick(this)" value="statusfilter" <#if radiofilterset  == "statusfilter">checked="true"</#if>>
 
 
-            <select class="form-control" name="status" id="status" placeholder="Статус" onchange="toggleSelect(this)">
+            <select class="form-control" name="status" <#if radiofilterset  != "statusfilter">disabled</#if> id="status" placeholder="Статус" onchange="toggleSelect(this)">
                 <option value="Статус">Статус</option>
                 <option value="Все">Все</option>
                 <#list statuses as status>
-                    <option value="${status.name}">${status.name}</option>
+                    <option <#if statusset?has_content && statusset  == "${status.name}">selected</#if> value="${status.name}">${status.name}</option>
                 </#list>
 
             </select>
@@ -67,20 +70,26 @@
 
         <div class="form-check form-check-inline mt-3">
 
-            <input type="radio" class="form-check-input" name="radiofilter" onclick="radioClick(this)" value="urgencyfilter">
+            <input type="radio" class="form-check-input" name="radiofilter" onclick="radioClick(this)" value="urgencyfilter" <#if radiofilterset  == "urgencyfilter">checked="true"</#if>>
 
 
-            <select class="form-control" name="urgency" disabled id="urgency" placeholder="Срочность" onchange="toggleSelect(this)">
+            <select class="form-control" name="urgency" <#if radiofilterset  != "urgencyfilter">disabled</#if> id="urgency" placeholder="Срочность" onchange="toggleSelect(this)">
                 <option value="Важность">Важность</option>
                 <option value="Все">Все</option>
                 <#list urgencys as urgency>
-                    <option value="${urgency.name}">${urgency.name}</option>
+                    <option <#if urgencyset?has_content && urgencyset  == "${urgency.name}">selected</#if> value="${urgency.name}">${urgency.name}</option>
                 </#list>
 
             </select>
 
         </div>
 
+
+        <br>
+        <div class="custom-control custom-checkbox">
+            <input type="checkbox" class="custom-control-input" id="finished" name="finished" <#if finished == "on">checked</#if> onchange="toggleCheckbox(this)">
+            <label class="custom-control-label"  for="finished">Исключая завершенные</label>
+        </div>
         <br>
         <div class="form-group row mt-3">
             <div class="col-sm-3">

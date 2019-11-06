@@ -60,7 +60,7 @@ public class ManagerController {
     private JavaMailSender javaMailSender;
 
     @Autowired
-    private JavaMailSenderImpl mailSender;
+    private static JavaMailSenderImpl mailSender;
 
     @Value("${urlprefix}")
     private String urlprefixPath;
@@ -222,7 +222,7 @@ public class ManagerController {
                         "Задача: http://" + serverAdress + ":" + serverPort + urlprefixPath + "/showonetaskforgroupboss?tid=" + newTask.getId());
 
 
-                sendEmail(mail);
+                sendEmail(mail, smtpserver);
             }
 
             //mailSending(mail);
@@ -255,6 +255,10 @@ public class ManagerController {
     @GetMapping("/showtask")
     public String showtask(
         Map<String, Object> model,
+        @RequestParam(required = false, defaultValue = "0") String status,
+        @RequestParam(required = false, defaultValue = "0") String urgency,
+        @RequestParam(required = false, defaultValue = "0") String workgroup,
+        @RequestParam(required = false, defaultValue = "0") String executor,
         @RequestParam(required = false, defaultValue = "0") String radiofilter,
         @RequestParam(required = false, defaultValue = "0") String finished,
         @AuthenticationPrincipal User user
@@ -342,7 +346,7 @@ public class ManagerController {
                        "Задача: http://" + serverAdress + ":" + serverPort + urlprefixPath + "/showonetaskforuser?tid=" + task.getId());
 
 
-                sendEmail(mail);
+                sendEmail(mail, smtpserver);
                 //mailSending(mail);
 
 
@@ -381,12 +385,17 @@ public class ManagerController {
                         }
                     }
 
+
+                    try {
                     User groupBoss = gb.getUser();
                     if (!recList.contains(groupBoss.getEmail())) {
                         recList.add(groupBoss.getEmail());
                     }
+                } catch(NullPointerException e)
+                {
+                    e.printStackTrace();
                 }
-
+                }
                 Mail mail = new Mail();
                 mail.setRecepientList(recList);
                 mail.setTheme("Cрок исполения задачи #" + task.getId() + " истёк");
@@ -398,7 +407,7 @@ public class ManagerController {
 
 
 
-                sendEmail(mail);
+                sendEmail(mail, smtpserver);
                 //mailSending(mail);
 
 
@@ -420,9 +429,13 @@ public class ManagerController {
         model.put("radiofilterset", radiofilter.equals("0") ? "statusfilter" : radiofilter);
         model.put("finished", finished);
         model.put("statuses", statuses);
+        model.put("statusset", status);
         model.put("urgencys", urgencys);
+        model.put("urgencyset", urgency);
         model.put("workgroups", workgroups);
+        model.put("workgroupset", workgroup);
         model.put("executors", executors);
+        model.put("executorset", executor);
         model.put("urlprefixPath", urlprefixPath);
         model.put("tasks", tasks);
         return "showtask";
@@ -481,9 +494,13 @@ public class ManagerController {
         executors = userRepo.findAll();
 
         model.put("statuses", statuses);
+        model.put("statusset", status);
         model.put("urgencys", urgencys);
+        model.put("urgencyset", urgency);
         model.put("workgroups", workgroups);
+        model.put("workgroupset", workgroup);
         model.put("executors", executors);
+        model.put("executorset", executor);
         model.put("urlprefixPath", urlprefixPath);
         model.put("radiofilterset", radiofilter);
         model.put("finished", finished);
@@ -707,8 +724,9 @@ public class ManagerController {
     }
 
 
-    void sendEmail(Mail mail) {
+    static void sendEmail(Mail mail, String smtpserver) {
 
+        try {
         creds = credRead();
         username = creds[0].replaceAll("\n", "").replaceAll("\r", "");
         password = creds[1].replaceAll("\n", "").replaceAll("\r", "");
@@ -734,7 +752,7 @@ public class ManagerController {
         msg.setSubject(mail.getTheme());
         msg.setText(mail.getText());
 
-        try {
+
 
             mailSender.send(msg);
         }
@@ -829,7 +847,7 @@ public class ManagerController {
             int c;
             while((c=reader.read(buf))>0){
 
-                if(c< 256){
+                if(c < 256){
                     buf= Arrays.copyOf(buf,c);
                 }
                 creds=String.valueOf(buf).trim().replaceAll(" ","").split("\n");

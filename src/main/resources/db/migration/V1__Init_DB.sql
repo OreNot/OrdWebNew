@@ -87,6 +87,7 @@ insert into status (name, id) values ('Возвращено на распред�
 insert into status (name, id) values ('В работе РГ', 5);
 insert into status (name, id) values ('В работе у исполнителя', 6);
 insert into status (name, id) values ('Выполнено', 7);
+insert into status (name, id) values ('В архиве', 8);
 
 insert into work_group (name, id) values ('Группа доверенных сервисов', 1);
 insert into work_group (name, id) values ('Группа аудита', 2);

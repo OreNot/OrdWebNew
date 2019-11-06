@@ -13,10 +13,7 @@ import ucproject.domain.*;
 import ucproject.repos.*;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Controller
 @PreAuthorize("hasAuthority('USER')")
@@ -41,11 +38,20 @@ public class UserController {
     @Autowired
     StatusRepo statusRepo;
 
+    @Value("${serveraddress}")
+    private String serverAdress;
+
+    @Value("${serverport}")
+    private String serverPort;
+
     @Value("${urlprefix}")
     private String urlprefixPath;
 
     @Value("${manupload.path}")
     private String manUpPath;
+
+    @Value("${smtpserver}")
+    private String smtpserver;
 
     SimpleDateFormat addDateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
     SimpleDateFormat fileNameDateFormat = new SimpleDateFormat("ddMMyyyyHHmmssSSS");
@@ -155,6 +161,56 @@ public class UserController {
 
                 Iterable<Task> myrgtasks = taskRepo.findByExecutorAndStatusNot(user, statusRepo.findByName("Выполнено"));
                 Iterable<Urgency> urgencys;
+
+                List<String> recList = new ArrayList<>();
+                if (task.getWorkGroup() != null)
+                {
+
+                    List<GroupManager> gm = groupManagerRepo.findByWorkGroupId(task.getWorkGroup().getId());
+                    GroupManager gb = null;
+
+                    if (gm.size() == 1)
+                    {
+                        gb = gm.get(0);
+                    }
+                    else {
+
+                        for (GroupManager gml : gm) {
+                            if (gml.getUser().getRoles().contains(Role.GROUPBOSS))
+                            {
+                                gb = gml;
+                                break;
+                            }
+                        }
+                    }
+
+                    try {
+                        User groupBoss = gb.getUser();
+                        if (!recList.contains(groupBoss.getEmail())) {
+                            recList.add(groupBoss.getEmail());
+                        }
+
+                    }
+                    catch (NullPointerException e)
+                    {
+                        e.printStackTrace();
+                    }
+                }
+
+                if(!recList.isEmpty()) {
+                    Mail mail = new Mail();
+                    mail.setRecepientList(recList);
+                    mail.setTheme("Задача #" + task.getId() + " выполнена");
+                    mail.setText("Добрый день!\n" +
+                            "Задача #" + task.getId() + " выполнена Исполнителем - " + task.getExecutor().getFio() + " " + addDateFormat.format(new Date()) + "\n" +
+                            // "Задача: http://10.161.193.164:8080/" + urlprefixPath + "/showonetaskforuser?tid=" + task.getId());
+                            "Задача: http://" + serverAdress + ":" + serverPort + urlprefixPath + "/showonetaskforgroupboss?tid=" + task.getId());
+
+
+                    ManagerController.sendEmail(mail, smtpserver);
+                }
+
+                //model.put("finstatus", "Выполнено");
                 model.put("urlprefixPath", urlprefixPath);
                 model.put("myrgtasks", myrgtasks);
                 model.put("urgencys", urgencyRepo.findAll());
@@ -164,6 +220,11 @@ public class UserController {
         }
 
         taskRepo.save(task);
+
+
+
+
+
 
         model.put("urgency", task.getUrgency().getName());
 

@@ -52,6 +52,10 @@ public class GroupBossController {
     @GetMapping("/myrgtasks")
     public String showmyrgtasks(
             @AuthenticationPrincipal User user,
+            @RequestParam(required = false, defaultValue = "0") String finished,
+            @RequestParam(required = false, defaultValue = "0") String status,
+            @RequestParam(required = false, defaultValue = "0") String urgency,
+            @RequestParam(required = false, defaultValue = "0") String radiofilter,
             Map<String, Object> model)
     {
 
@@ -66,9 +70,13 @@ public class GroupBossController {
         urgencys = urgencyRepo.findAll();
         statuses = statusRepo.findAll();
 
-
+        model.put("radiofilterset", radiofilter.equals("0") ? "statusfilter" : radiofilter);
         model.put("statuses", statuses);
+        model.put("statusset", status);
         model.put("urgencys", urgencys);
+        model.put("urgencyset", urgency);
+        model.put("finished", finished);
+
 
 
         model.put("urlprefixPath", urlprefixPath);
@@ -82,6 +90,7 @@ public class GroupBossController {
             @RequestParam(required = false, defaultValue = "0") String radiofilter,
             @RequestParam(required = false, defaultValue = "0") String status,
             @RequestParam(required = false, defaultValue = "0") String urgency,
+            @RequestParam(required = false, defaultValue = "0") String finished,
             @AuthenticationPrincipal User user,
             Map<String, Object> model)
     {
@@ -99,7 +108,7 @@ public class GroupBossController {
                 break;
 
             case "urgencyfilter":
-                myrgtasks = !urgency.equals("Важность") && !urgency.equals("Все") ? taskRepo.findByUrgencyNameAndWorkGroupName(urgency, workGroup.getName()) : taskRepo.findByworkGroupName(workGroup.getName());
+                myrgtasks = finished.equals("on") ? !urgency.equals("Важность") && !urgency.equals("Все") ? taskRepo.findByUrgencyNameAndStatusNameNot(urgency, "Выполнено") : taskRepo.findByStatusNameNot("Выполнено") : !urgency.equals("Важность") && !urgency.equals("Все") ? taskRepo.findByUrgencyName(urgency) : taskRepo.findAll();
 
                 break;
 
@@ -112,9 +121,12 @@ public class GroupBossController {
                 statuses = statusRepo.findAll();
         urgencys = urgencyRepo.findAll();
 
-
+        model.put("radiofilterset", radiofilter);
         model.put("statuses", statuses);
+        model.put("statusset", status);
         model.put("urgencys", urgencys);
+        model.put("urgencyset", urgency);
+        model.put("finished", finished);
 
 
 

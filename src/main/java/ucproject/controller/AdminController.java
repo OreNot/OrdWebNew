@@ -12,8 +12,12 @@ import ucproject.repos.GroupManagerRepo;
 import ucproject.repos.UserRepo;
 import ucproject.repos.WorkGroupRepo;
 
-import java.util.Map;
-import java.util.Set;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.stream.Stream;
 
 @Controller
 @PreAuthorize("hasAuthority('ADMIN')")
@@ -34,6 +38,9 @@ public class AdminController {
 
     @Value("${manupload.path}")
     private String manUpPath;
+
+    @Value("${logfile}")
+    private String logPath;
 
     @GetMapping("/usersettings")
     public String showusers(Map<String, Object> model) {
@@ -132,6 +139,7 @@ public class AdminController {
         return "usersettings";
 
     }
+
 
 
 }
